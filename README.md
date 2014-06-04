@@ -32,11 +32,10 @@ Loop through all your jobs and print the titles:
     for job in conn.jobs():
         print job['title']
 
-Create a new job with some new tasks:
+Create a new job with some new units:
 
     job = conn.upload(data)
     print job
-
 
 
 ## Fancy stuff
@@ -53,4 +52,4 @@ If you don't want to print the responses, you still need to exhaust the loop:
 
 ## License
 
-Copyright © 2014 Christopher Brown. [MIT Licensed](LICENSE).
+Copyright © 2014 Christopher Brown. [MIT Licensed](https://raw.github.com/chbrown/crowdflower/master/LICENSE).
