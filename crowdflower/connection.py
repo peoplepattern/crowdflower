@@ -21,6 +21,7 @@ class Connection(object):
 
         self._session = Session()
         self._session.params['key'] = self.api_key
+        self._session.verify = False
 
 
     def __repr__(self):
@@ -42,7 +43,7 @@ class Connection(object):
     def request(self, path, method='GET', params=None, headers=None, data=None):
         # simple request helper
         headers = merge(headers, dict(Accept='application/json'))
-        req = self.create_request(path, method='GET', params=params, headers=headers, data=data)
+        req = self.create_request(path, method=method, params=params, headers=headers, data=data)
         res = self.send_request(req)
         try:
             return res.json()

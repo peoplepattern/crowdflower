@@ -5,6 +5,8 @@ from pprint import pformat
 from cStringIO import StringIO
 import grequests
 
+from crowdflower import logger
+
 
 def read_zip_csv(zf):
     for zipinfo in zf.filelist:
@@ -12,6 +14,19 @@ def read_zip_csv(zf):
         reader = csv.DictReader(zipinfo_fp)
         for row in reader:
             yield row
+
+def to_params(props):
+    # not sure if this is properly recursive
+    for key, value in props.items():
+        if isinstance(value, list):
+            # Rails cruft inherent in the CrowdFlower API
+            for subvalue in value:
+                yield '[%s][]' % key, subvalue
+        elif isinstance(value, dict):
+            for subkey, subvalue in to_params(value):
+                yield '[%s][%s]' % (key, subkey), subvalue
+        else:
+            yield '[%s]' % key, value
 
 
 class Job(object):
@@ -103,9 +118,70 @@ class Job(object):
         return res
 
     def update(self, props):
-        params = {'job[%s]' % key: value for key, value in props.items()}
+        params = {'job' + key: value for key, value in to_params(props)}
+        logger.debug('Updating Job#%d: %r', self.id, params)
+        res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
+
+        # reset cached properties
         self._properties = {}
-        return self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
+
+        return res
+
+    def channels(self):
+        '''
+        Manual channel control is deprecated.
+
+        The API documentation includes a PUT call at this endpoint, but I'm
+        not sure if it actually does anything.
+        '''
+        return self._connection.request('/jobs/%s/channels' % self.id)
+
+    def legend(self):
+        '''
+        From the CrowdFlower documentation:
+
+        > The legend will show you the generated keys that will end up being
+        > submitted with your form.
+        '''
+        return self._connection.request('/jobs/%s/legend' % self.id)
+
+    def gold_reset(self):
+        '''
+        Mark all of this job's test questions (gold data) as NOT gold.
+
+        Splitting the /jobs/:job_id/gold API call into gold_reset() and
+        gold_add() is not faithful to the API, but resetting gold marks
+        and adding them should not have the same API endpoint in the first place.
+        '''
+        params = dict(reset='true')
+        res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
+        # reset cache
+        self._properties = {}
+        self._units = {}
+        return res
+
+    def gold_add(self, check, check_with=None):
+        '''
+        Configure the gold labels for a task.
+
+        * check: the name of the field being checked against
+            - Can call /jobs/{job_id}/legend to see options
+            - And as far as I can tell, the job.properties['gold'] field is a
+              hash with keys that are "check" names, and values that are "with" names.
+        * check_with: the name of the field containing the gold label for check
+            - Crowdflower calls this field "with", which is a Python keyword
+            - defaults to check + '_gold'
+
+        I'm not sure why convert_units would be anything but true.
+        '''
+        params = dict(check=check, convert_units='true')
+        if check_with is not None:
+            params['with'] = check_with
+        res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
+        # reset cache
+        self._properties = {}
+        self._units = {}
+        return res
 
     def delete(self):
         return self._connection.request('/jobs/%s' % self.id, method='DELETE')

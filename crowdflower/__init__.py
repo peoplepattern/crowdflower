@@ -15,6 +15,3 @@ logger = logging.getLogger('crowdflower')
 
 # import helper
 from connection import Connection
-
-
-__all__ = ['here', 'root', 'logger', 'Connection']
