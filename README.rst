@@ -7,7 +7,13 @@ Minimal client library for interacting with the
 Installation
 ------------
 
-Install from github at this point:
+Install from PyPI:
+
+::
+
+    easy_install crowdflower
+
+Or install the latest version GitHub:
 
 ::
 
