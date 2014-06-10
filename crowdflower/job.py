@@ -237,7 +237,7 @@ class Job(object):
         # pulls down the csv endpoint, unzips it, and returns a list of all the rows
         params = dict(full='true' if full else 'false')
         # use .csv, not headers=dict(Accept='text/csv'), which Crowdflower rejects
-        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='POST', params=params)
+        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
         res = self._connection.send_request(req)
         # because ZipFile insists on seeking, we can't simply pass over the res.raw stream
         fp = StringIO()
