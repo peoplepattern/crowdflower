@@ -24,7 +24,7 @@ def to_params(props):
                 yield '[%s][]' % key, subvalue
         elif isinstance(value, dict):
             for subkey, subvalue in to_params(value):
-                yield '[%s][%s]' % (key, subkey), subvalue
+                yield '[%s]%s' % (key, subkey), subvalue
         else:
             yield '[%s]' % key, value
 
@@ -118,7 +118,7 @@ class Job(object):
         return res
 
     def update(self, props):
-        params = {'job' + key: value for key, value in to_params(props)}
+        params = [('job' + key, value) for key, value in to_params(props)]
         logger.debug('Updating Job#%d: %r', self.id, params)
         res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
 
