@@ -75,6 +75,13 @@ loop:
 
     list(job.clear_units())
 
+References
+----------
+
+This package uses `kennethreitz <https://github.com/kennethreitz>`__'s
+`Requests <http://docs.python-requests.org/en/latest/api/>`__ to
+communicate with the CrowdFlower API over HTTP.
+
 License
 -------
 
