@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='crowdflower',
-    version='0.0.4',
+    version='0.0.5',
     author='Christopher Brown',
     author_email='io@henrian.com',
     url='https://github.com/chbrown/crowdflower',
@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     classifiers=[
         # https://pypi.python.org/pypi?:action=list_classifiers
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
     ],
     install_requires=[
