@@ -1,5 +1,6 @@
 import os
 import json
+from crowdflower.exception import CrowdFlowerError, CrowdFlowerJSONError
 from requests import Request, Session
 from grequests import AsyncRequest
 
@@ -33,24 +34,37 @@ class Connection(object):
         return Request(method=method, url=url, **kw)
 
     def send_request(self, req):
+        '''
+        returns requests.Response object
+
+        raise
+        '''
         # requests gotcha: even if send through the session, request.prepare()
         # does not get merged with the session's attributes, so we have to call
         # session.prepare_request(...)
         prepared_req = self._session.prepare_request(req)
-        # return requests.Response object
-        return self._session.send(prepared_req)
+        res = self._session.send(prepared_req)
+        if res.status_code != 200:
+            # CrowdFlower responds with a '202 Accepted' when we request a bulk
+            # download which has not yet been generated, which means we simply
+            # have to wait and try again
+            raise CrowdFlowerError(req, res)
+        return res
 
     def request(self, path, method='GET', params=None, headers=None, data=None):
         # simple request helper
-        headers = merge(headers, dict(Accept='application/json'))
+        if headers is None:
+            headers = dict()
+        headers.update(Accept='application/json')
         req = self.create_request(path, method=method, params=params, headers=headers, data=data)
         res = self.send_request(req)
         try:
+            # what Requests might actually raise is a simplejson.scanner.JSONDecodeError,
+            # but I'm pretty sure that's the only error .json() might raise, so we don't
+            # to type-match it.
             return res.json()
-        # except simplejson.scanner.JSONDecodeError:
-        except Exception:
-            # should raise something like an APIException if JSON parse fails, but oh well
-            return res.text
+        except Exception, err:
+            raise CrowdFlowerJSONError(req, res, err)
 
     # def grequest(self, path, method='GET', params=None, data=None, headers=None):
     #     method, url, kwargs = self._prepare_request(path, method, params, data, headers)

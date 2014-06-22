@@ -54,6 +54,11 @@ If you don't want to print the responses, you still need to exhaust the loop:
     list(job.clear_units())
 
 
+## References
+
+This package uses [kennethreitz](https://github.com/kennethreitz)'s [Requests](http://docs.python-requests.org/en/latest/api/) to communicate with the CrowdFlower API over HTTP.
+
+
 ## License
 
 Copyright © 2014 Christopher Brown. [MIT Licensed](https://raw.github.com/chbrown/crowdflower/master/LICENSE).
