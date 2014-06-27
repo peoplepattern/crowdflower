@@ -75,11 +75,22 @@ class Connection(object):
         return Job(job_id, self)
 
     def jobs(self):
-        for job_response in self.request('/jobs').json():
-            job = Job(job_response['id'], self)
-            # populate the Job's properties, since we have all the data anyway
-            job._properties = job_response
-            yield job
+        '''
+        The API documentation does not specify this, but there is a hard-coded
+        limit=10 parameter on the /jobs endpoint, and no total count, so we must
+        page through until we get a response with fewer than 10 items.
+        '''
+        page = 0
+        while True:
+            page += 1
+            job_responses = self.request('/jobs', params=dict(page=page))
+            for job_response in job_responses:
+                job = Job(job_response['id'], self)
+                # populate the Job's properties, since we have all the data anyway
+                job._properties = job_response
+                yield job
+            if len(job_responses) < 10:
+                break
 
     def upload(self, units):
         '''
