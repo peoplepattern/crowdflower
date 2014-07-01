@@ -3,7 +3,6 @@ import json
 import zipfile
 from pprint import pformat
 from cStringIO import StringIO
-import grequests
 
 from crowdflower import logger
 
@@ -82,9 +81,14 @@ class Job(object):
         # cacheable:
         self._properties = {}
         self._units = {}
+        self._judgments = []
 
     def __json__(self):
-        return self.properties
+        return {
+            'judgments': self.judgments,
+            'properties': self.properties,
+            'units': self.units,
+        }
 
     def __repr__(self):
         return pformat(self.properties)
@@ -97,15 +101,30 @@ class Job(object):
 
     @property
     def units(self):
+        '''
+        Returns a dict of {unit_id: dict_of_unit_properties}, e.g.,
+
+            {
+                u'495781935': {
+                    u'id': u'may25_1029',
+                    u'text': u'remember when I was in hospital for four months nd it was my birthday nd everyone forgot nd no one even came to visit me'
+                },
+                u'495781936': {
+                    u'id': u'may25_1030',
+                    u'text': u'I had the wifi taken away and I can't have any friends over what a great Summer!'
+                }
+                ...
+            }
+
+        Automatically cached.
+        '''
         if len(self._units) == 0:
             self._units = self._connection.request('/jobs/%s/units' % self.id)
         return self._units
 
-    def clear_units(self, parallel=20):
-        reqs = (self._connection.grequest('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
-            for unit_id in self.units.keys())
-        for response in grequests.imap(reqs, size=parallel):
-            yield response
+    def delete_unit(self, unit_id):
+        del self._units[unit_id]
+        return self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
 
     def upload(self, units):
         headers = {'Content-Type': 'application/json'}
@@ -184,6 +203,9 @@ class Job(object):
         return res
 
     def delete(self):
+        '''
+        Deletes the entire job permanently
+        '''
         return self._connection.request('/jobs/%s' % self.id, method='DELETE')
 
     def download(self, full=True):
@@ -242,7 +264,14 @@ class Job(object):
         # because ZipFile insists on seeking, we can't simply pass over the res.raw stream
         fp = StringIO()
         fp.write(res.content)
-        # fp.seek(0)
+        # ZipFile does fp.seek(0) itself
         zf = zipfile.ZipFile(fp)
-        # yield each row?
-        return list(read_zip_csv(zf))
+        for row in read_zip_csv(zf):
+            yield row
+
+    @property
+    def judgments(self):
+        if len(self._judgments) == 0:
+            # store on job instance
+            self._judgments = list(self.download())
+        return self._judgments

@@ -2,7 +2,6 @@ import os
 import json
 from crowdflower.exception import CrowdFlowerError, CrowdFlowerJSONError
 from requests import Request, Session
-from grequests import AsyncRequest
 
 # from crowdflower import logger
 from crowdflower.job import Job
@@ -65,10 +64,6 @@ class Connection(object):
             return res.json()
         except Exception, err:
             raise CrowdFlowerJSONError(req, res, err)
-
-    # def grequest(self, path, method='GET', params=None, data=None, headers=None):
-    #     method, url, kwargs = self._prepare_request(path, method, params, data, headers)
-    #     return AsyncRequest(method, url, **kwargs)
 
     def job(self, job_id):
         # lazy; doesn't actually call anything

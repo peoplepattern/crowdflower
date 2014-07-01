@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='crowdflower',
-    version='0.0.6',
+    version='0.0.7',
     author='Christopher Brown',
     author_email='io@henrian.com',
     url='https://github.com/chbrown/crowdflower',
@@ -19,7 +19,6 @@ setup(
     ],
     install_requires=[
         'requests>=2.0.0',
-        'grequests',
     ],
     entry_points={
         'console_scripts': [
