@@ -5,6 +5,7 @@ from pprint import pformat
 from cStringIO import StringIO
 
 from crowdflower import logger
+from crowdflower.cache import cacheable, keyfunc
 
 
 def read_zip_csv(zf):
@@ -13,6 +14,7 @@ def read_zip_csv(zf):
         reader = csv.DictReader(zipinfo_fp)
         for row in reader:
             yield row
+
 
 def to_params(props):
     # not sure if this is properly recursive
@@ -74,32 +76,23 @@ class Job(object):
 
     '''
     READ_WRITE_FIELDS = ['auto_order', 'auto_order_threshold', 'auto_order_timeout', 'cml', 'cml_fields', 'confidence_fields', 'css', 'custom_key', 'excluded_countries', 'gold_per_assignment', 'included_countries', 'instructions', 'js', 'judgments_per_unit', 'language', 'max_judgments_per_unit', 'max_judgments_per_contributor', 'min_unit_confidence', 'options', 'pages_per_assignment', 'problem', 'send_judgments_webhook', 'state', 'title', 'units_per_assignment', 'webhook_uri']
+    _cache_key_attrs = ('id',)
 
     def __init__(self, job_id, connection):
         self.id = job_id
         self._connection = connection
-        # cacheable:
-        self._properties = {}
-        self._units = {}
-        self._judgments = []
-
-    def __json__(self):
-        return {
-            'judgments': self.judgments,
-            'properties': self.properties,
-            'units': self.units,
-        }
+        self._cache = self._connection._cache
 
     def __repr__(self):
         return pformat(self.properties)
 
     @property
+    @cacheable
     def properties(self):
-        if len(self._properties) == 0:
-            self._properties = self._connection.request('/jobs/%s' % self.id)
-        return self._properties
+        return self._connection.request('/jobs/%s' % self.id)
 
     @property
+    @cacheable
     def units(self):
         '''
         Returns a dict of {unit_id: dict_of_unit_properties}, e.g.,
@@ -118,13 +111,13 @@ class Job(object):
 
         Automatically cached.
         '''
-        if len(self._units) == 0:
-            self._units = self._connection.request('/jobs/%s/units' % self.id)
-        return self._units
+        self._connection.request('/jobs/%s/units' % self.id)
 
     def delete_unit(self, unit_id):
-        del self._units[unit_id]
-        return self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
+        response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
+        # bust cache if the request did not raise any errors
+        self._cache.remove(keyfunc(self, 'units'))
+        return response
 
     def upload(self, units):
         headers = {'Content-Type': 'application/json'}
@@ -132,17 +125,17 @@ class Job(object):
         res = self._connection.request('/jobs/%s/upload' % self.id, method='POST', headers=headers, data=data)
 
         # reset cached units
-        self._units = {}
+        self._cache.remove(keyfunc(self, 'units'))
 
         return res
 
     def update(self, props):
         params = [('job' + key, value) for key, value in to_params(props)]
-        logger.debug('Updating Job#%d: %r', self.id, params)
+        logger.debug('Updating Job[%d]: %r', self.id, params)
         res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
 
         # reset cached properties
-        self._properties = {}
+        self._cache.remove(keyfunc(self, 'properties'))
 
         return res
 
@@ -175,8 +168,8 @@ class Job(object):
         params = dict(reset='true')
         res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
         # reset cache
-        self._properties = {}
-        self._units = {}
+        self._cache.remove(keyfunc(self, 'properties'))
+        self._cache.remove(keyfunc(self, 'units'))
         return res
 
     def gold_add(self, check, check_with=None):
@@ -198,8 +191,8 @@ class Job(object):
             params['with'] = check_with
         res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
         # reset cache
-        self._properties = {}
-        self._units = {}
+        self._cache.remove(keyfunc(self, 'properties'))
+        self._cache.remove(keyfunc(self, 'units'))
         return res
 
     def delete(self):
@@ -270,8 +263,6 @@ class Job(object):
             yield row
 
     @property
+    @cacheable
     def judgments(self):
-        if len(self._judgments) == 0:
-            # store on job instance
-            self._judgments = list(self.download())
-        return self._judgments
+        return self.download()

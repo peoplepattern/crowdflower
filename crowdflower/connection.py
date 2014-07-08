@@ -3,8 +3,8 @@ import json
 from crowdflower.exception import CrowdFlowerError, CrowdFlowerJSONError
 from requests import Request, Session
 
-# from crowdflower import logger
 from crowdflower.job import Job
+from crowdflower.cache import FilesystemCache, NoCache
 
 
 def merge(*dicts):
@@ -15,9 +15,15 @@ class Connection(object):
     DEFAULT_API_KEY = os.getenv('CROWDFLOWER_API_KEY')
     DEFAULT_API_URL = 'https://api.crowdflower.com/v1'
 
-    def __init__(self, api_key=DEFAULT_API_KEY, api_url=DEFAULT_API_URL):
+    def __init__(self, cache=None, api_key=DEFAULT_API_KEY, api_url=DEFAULT_API_URL):
         self.api_key = api_key
         self.api_url = api_url
+
+        if cache == 'filesystem':
+            self._cache = FilesystemCache()
+        # elif ... others?
+        else:
+            self._cache = NoCache()
 
         self._session = Session()
         self._session.params['key'] = self.api_key
