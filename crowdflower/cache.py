@@ -104,9 +104,11 @@ class NoCache(AbstractCache):
 
 
 class FilesystemCache(AbstractCache):
-    def __init__(self, dirpath='/tmp'):
+    def __init__(self, dirpath='/tmp/crowdflower'):
         self.dirpath = dirpath
-        self.filepaths = set()
+        if not (os.path.exists(dirpath) and os.path.isdir(dirpath)):
+            # this should rightly fail if dirpath is a file, or cannot be accessed
+            os.makedirs(dirpath)
 
     def _filename(self, key):
         return os.path.join(self.dirpath, clean_filename(key)) + '.json'
@@ -114,22 +116,20 @@ class FilesystemCache(AbstractCache):
     def get(self, key):
         filepath = self._filename(key)
         if os.path.exists(filepath):
-            self.filepaths.add(filepath)
             with open(filepath) as fp:
                 return json.load(fp)
 
     def put(self, key, value):
         filepath = self._filename(key)
-        self.filepaths.add(filepath)
         with open(filepath, 'w') as fp:
             json.dump(value, fp)
 
     def remove(self, key):
         filepath = self._filename(key)
-        self.filepaths.remove(filepath)
         if os.path.exists(filepath):
             os.remove(filepath)
 
     def removeAll(self):
-        for filepath in self.filepaths:
+        for filename in os.listdir(self.dirpath):
+            filepath = os.path.join(self.dirpath, filename)
             os.remove(filepath)
