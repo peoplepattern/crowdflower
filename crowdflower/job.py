@@ -93,6 +93,12 @@ class Job(object):
 
     @property
     @cacheable
+    def tags(self):
+        res = self._connection.request('/jobs/%s/tags' % self.id)
+        return [item['name'] for item in res]
+
+    @property
+    @cacheable
     def units(self):
         '''
         Returns a dict of {unit_id: dict_of_unit_properties}, e.g.,
