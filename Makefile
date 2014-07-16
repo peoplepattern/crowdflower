@@ -1,11 +1,13 @@
-all: install
-
-install:
-	python setup.py install
+all: develop README.rst
 
 develop:
 	python setup.py develop
 
-publish:
-	pandoc README.md -o README.rst
+install:
+	python setup.py install
+
+README.rst: README.md
+	pandoc README.md -o $@
+
+publish: README.rst
 	python setup.py register sdist upload

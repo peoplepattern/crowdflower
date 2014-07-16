@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='crowdflower',
-    version='0.0.8',
+    version='0.0.9',
     author='Christopher Brown',
     author_email='io@henrian.com',
     url='https://github.com/chbrown/crowdflower',
     keywords='crowdflower crowdsourcing api client',
-    description='Crowdflower API - Python Client',
+    description='CrowdFlower API - Python client',
     long_description=open('README.rst').read(),
     license=open('LICENSE').read(),
     packages=find_packages(),
@@ -20,8 +20,4 @@ setup(
     install_requires=[
         'requests>=2.0.0',
     ],
-    entry_points={
-        'console_scripts': [
-        ],
-    },
 )
