@@ -90,6 +90,21 @@ Create a new job with some new units:
 
     print job
 
+Motivation
+----------
+
+The official `Ruby
+client <https://github.com/CrowdFlower/ruby-crowdflower>`__ is hard to
+use, which is surprising, since the CrowdFlower API is so simple.
+
+Which is not to say the `CrowdFlower
+API <http://success.crowdflower.com/customer/portal/articles/1288323-api-documentation>`__
+is all ponies and rainbows, but all the documentation is there on one
+page, and it does what it says, for the most part. (Though there's more
+that you can do, beyond what's documented.)
+
+Thus, a thin Python client for the CrowdFlower API.
+
 References
 ----------
 
