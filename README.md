@@ -37,6 +37,7 @@ option currently supported, and serializes JSON files to `/tmp/crowdflower/*`.
 
     conn = crowdflower.Connection(cache='filesystem')
 
+
 ## More examples
 
 Loop through all your jobs and print the titles:
@@ -66,6 +67,15 @@ Create a new job with some new units:
     job.gold_add('gender', 'gender_gold')
 
     print job
+
+
+## Motivation
+
+The official [Ruby client](https://github.com/CrowdFlower/ruby-crowdflower) is hard to use, which is surprising, since the CrowdFlower API is so simple.
+
+Which is not to say the [CrowdFlower API](http://success.crowdflower.com/customer/portal/articles/1288323-api-documentation) is all ponies and rainbows, but all the documentation is there on one page, and it does what it says, for the most part. (Though there's more that you can do, beyond what's documented.)
+
+Thus, a thin Python client for the CrowdFlower API.
 
 
 ## References

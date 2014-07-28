@@ -4,16 +4,13 @@ from crowdflower.exception import CrowdFlowerError, CrowdFlowerJSONError
 from requests import Request, Session
 
 from crowdflower.job import Job
-from crowdflower.cache import FilesystemCache, NoCache
-
-
-def merge(*dicts):
-    return dict((key, value) for d in dicts if d for key, value in d.items())
+from crowdflower.cache import FilesystemCache, NoCache, cacheable
 
 
 class Connection(object):
     DEFAULT_API_KEY = os.getenv('CROWDFLOWER_API_KEY')
     DEFAULT_API_URL = 'https://api.crowdflower.com/v1'
+    _cache_key_attrs = ('api_key',)
 
     def __init__(self, cache=None, api_key=DEFAULT_API_KEY, api_url=DEFAULT_API_URL):
         self.api_key = api_key
@@ -27,7 +24,7 @@ class Connection(object):
 
         self._session = Session()
         self._session.params['key'] = self.api_key
-        self._session.verify = False
+        # self._session.verify = False
 
 
     def __repr__(self):
@@ -47,6 +44,7 @@ class Connection(object):
         # requests gotcha: even if send through the session, request.prepare()
         # does not get merged with the session's attributes, so we have to call
         # session.prepare_request(...)
+        # req.params['key'] = self.api_key
         prepared_req = self._session.prepare_request(req)
         res = self._session.send(prepared_req)
         if res.status_code != 200:
@@ -72,26 +70,37 @@ class Connection(object):
             raise CrowdFlowerJSONError(req, res, err)
 
     def job(self, job_id):
-        # lazy; doesn't actually call anything
+        # doesn't actually call anything
         return Job(job_id, self)
 
-    def jobs(self):
+    @property
+    @cacheable
+    def job_ids(self):
         '''
         The API documentation does not specify this, but there is a hard-coded
         limit=10 parameter on the /jobs endpoint, and no total count, so we must
         page through until we get a response with fewer than 10 items.
+
+        Apparently, other parameters, like query='pt' and fields[]='tags' don't work.
         '''
         page = 0
         while True:
             page += 1
-            job_responses = self.request('/jobs', params=dict(page=page))
-            for job_response in job_responses:
-                job = Job(job_response['id'], self)
-                # populate the Job's properties, since we have all the data anyway
-                job._properties = job_response
-                yield job
-            if len(job_responses) < 10:
+            params = dict(page=page)
+            jobs_response = self.request('/jobs', params=params)
+            for job_properties in jobs_response:
+                # somehow add the Job's properties to the cache, since we have all the data anyway?
+                yield job_properties['id']
+            if len(jobs_response) < 10:
                 break
+
+    def jobs(self):
+        '''
+        This is separated from job_ids to aid in caching. They have no cause
+        to be separate except to avoid marshaling issues when encoding/decoding.
+        '''
+        for job_id in self.job_ids:
+            yield Job(job_id, self)
 
     def upload(self, units):
         '''
@@ -106,3 +115,9 @@ class Connection(object):
         job = Job(job_response['id'], self)
         job._properties = job_response
         return job
+
+    def account(self):
+        '''
+        This is very short and simple, but it's not documented in the API.
+        '''
+        return self.request('/account')

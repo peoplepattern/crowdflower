@@ -6,28 +6,7 @@ from cStringIO import StringIO
 
 from crowdflower import logger
 from crowdflower.cache import cacheable, keyfunc
-
-
-def read_zip_csv(zf):
-    for zipinfo in zf.filelist:
-        zipinfo_fp = zf.open(zipinfo)
-        reader = csv.DictReader(zipinfo_fp)
-        for row in reader:
-            yield row
-
-
-def to_params(props):
-    # not sure if this is properly recursive
-    for key, value in props.items():
-        if isinstance(value, list):
-            # Rails cruft inherent in the CrowdFlower API
-            for subvalue in value:
-                yield '[%s][]' % key, subvalue
-        elif isinstance(value, dict):
-            for subkey, subvalue in to_params(value):
-                yield '[%s]%s' % (key, subkey), subvalue
-        else:
-            yield '[%s]' % key, value
+from crowdflower.serialization import rails_params
 
 
 class Job(object):
@@ -136,7 +115,7 @@ class Job(object):
         return res
 
     def update(self, props):
-        params = [('job' + key, value) for key, value in to_params(props)]
+        params = rails_params({'job': props})
         logger.debug('Updating Job[%d]: %r', self.id, params)
         res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
 
@@ -265,8 +244,11 @@ class Job(object):
         fp.write(res.content)
         # ZipFile does fp.seek(0) itself
         zf = zipfile.ZipFile(fp)
-        for row in read_zip_csv(zf):
-            yield row
+        for zipinfo in zf.filelist:
+            zipinfo_fp = zf.open(zipinfo)
+            reader = csv.DictReader(zipinfo_fp)
+            for row in reader:
+                yield {key: value.decode('utf8') for key, value in row.items()}
 
     @property
     @cacheable

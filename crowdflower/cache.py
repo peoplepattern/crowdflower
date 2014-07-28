@@ -41,7 +41,7 @@ def keyfunc(instance, func_name):
 
 
 def cacheable(func):
-    '''A function decorator. Use like:
+    '''A class method decorator. Use like:
 
     class User(object):
         _cache_key_attrs = ('user_id',)
@@ -57,8 +57,10 @@ def cacheable(func):
             yield 'searched for somethign'
             # etc.
 
+    The class it is used in must have a `_cache_key_attrs` attribute and a `_cache` Cache instance.
+
     '''
-    # def decorator(func):
+    # def decorator(func): return decorator
     def wrapper(self, *args, **kwargs):
         key = keyfunc(self, func.__name__)
         value = self._cache.get(key)
@@ -72,7 +74,6 @@ def cacheable(func):
             logger.info('cache hit; reading "%s" from cache', key)
         return value
     return wrapper
-    # return decorator
 
 
 class AbstractCache(object):
