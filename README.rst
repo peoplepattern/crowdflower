@@ -113,6 +113,13 @@ This package uses `kennethreitz <https://github.com/kennethreitz>`__'s
 communicate with the CrowdFlower API over HTTP. Requests is `Apache2
 licensed <http://docs.python-requests.org/en/latest/user/intro/#apache2-license>`__.
 
+-  `The main API documentation
+   page <http://success.crowdflower.com/customer/portal/articles/1288323>`__
+-  `More info on the
+   API <http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api>`__
+-  `Details on using API
+   webhooks <http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api>`__
+
 Authors
 -------
 
