@@ -2,9 +2,11 @@ import os
 import json
 from crowdflower.exception import CrowdFlowerError, CrowdFlowerJSONError
 from requests import Request, Session
+# I regret that python-requests can't handle merging lists of params
+from requests.utils import to_key_val_list
 
 from crowdflower.job import Job
-from crowdflower.cache import FilesystemCache, NoCache, cacheable
+from crowdflower.cache import FilesystemCache, NoCache, cacheable, keyfunc
 
 
 class Connection(object):
@@ -23,7 +25,7 @@ class Connection(object):
             self._cache = NoCache()
 
         self._session = Session()
-        self._session.params['key'] = self.api_key
+        # self._session.params['key'] = self.api_key
         # self._session.verify = False
 
 
@@ -44,7 +46,9 @@ class Connection(object):
         # requests gotcha: even if send through the session, request.prepare()
         # does not get merged with the session's attributes, so we have to call
         # session.prepare_request(...)
-        # req.params['key'] = self.api_key
+
+        # merge params with the api key
+        req.params = to_key_val_list(req.params) + [('key', self.api_key)]
         prepared_req = self._session.prepare_request(req)
         res = self._session.send(prepared_req)
         if res.status_code != 200:
@@ -74,7 +78,7 @@ class Connection(object):
         return Job(job_id, self)
 
     @property
-    @cacheable
+    @cacheable()
     def job_ids(self):
         '''
         The API documentation does not specify this, but there is a hard-coded
@@ -114,6 +118,8 @@ class Connection(object):
         job_response = self.request('/jobs/upload', method='POST', headers=headers, data=data)
         job = Job(job_response['id'], self)
         job._properties = job_response
+        # bust cache of job_ids
+        self._cache.remove(keyfunc(self, 'job_ids'))
         return job
 
     def account(self):

@@ -82,6 +82,10 @@ Thus, a thin Python client for the CrowdFlower API.
 
 This package uses [kennethreitz](https://github.com/kennethreitz)'s [Requests](http://docs.python-requests.org/en/latest/api/) to communicate with the CrowdFlower API over HTTP. Requests is [Apache2 licensed](http://docs.python-requests.org/en/latest/user/intro/#apache2-license).
 
+* [The main API documentation page](http://success.crowdflower.com/customer/portal/articles/1288323)
+* [More info on the API](http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api)
+* [Details on using API webhooks](http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api)
+
 
 ## Authors
 

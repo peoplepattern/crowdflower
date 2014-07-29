@@ -66,18 +66,30 @@ class Job(object):
         return pformat(self.properties)
 
     @property
-    @cacheable
+    @cacheable()
     def properties(self):
         return self._connection.request('/jobs/%s' % self.id)
 
-    @property
-    @cacheable
-    def tags(self):
+
+    @cacheable('tags')
+    def get_tags(self):
         res = self._connection.request('/jobs/%s/tags' % self.id)
         return [item['name'] for item in res]
 
+    def set_tags(self, tags):
+        params = rails_params({'tags': tags})
+        self._connection.request('/jobs/%s/tags' % self.id, method='PUT', params=params)
+        self._cache.remove(keyfunc(self, 'tags'))
+
+    tags = property(get_tags, set_tags)
+
+    def add_tags(self, tags):
+        params = rails_params({'tags': tags})
+        self._connection.request('/jobs/%s/tags' % self.id, method='POST', params=params)
+        self._cache.remove(keyfunc(self, 'tags'))
+
     @property
-    @cacheable
+    @cacheable()
     def units(self):
         '''
         Returns a dict of {unit_id: dict_of_unit_properties}, e.g.,
@@ -251,6 +263,6 @@ class Job(object):
                 yield {key: value.decode('utf8') for key, value in row.items()}
 
     @property
-    @cacheable
+    @cacheable()
     def judgments(self):
         return self.download()

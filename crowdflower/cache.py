@@ -35,13 +35,13 @@ def flatten(obj):
     return obj
 
 
-def keyfunc(instance, func_name):
-    cache_key_values = [getattr(instance, attr) for attr in instance._cache_key_attrs]
-    return '%s[%s].%s' % (instance.__class__.__name__, ':'.join(map(str, cache_key_values)), func_name)
+def keyfunc(instance, func_attr):
+    cache_key_values = [getattr(instance, cache_key_attr) for cache_key_attr in instance._cache_key_attrs]
+    return '%s[%s].%s' % (instance.__class__.__name__, ':'.join(map(str, cache_key_values)), func_attr)
 
 
-def cacheable(func):
-    '''A class method decorator. Use like:
+def cacheable(name=None):
+    '''An object method decorator. Use like:
 
     class User(object):
         _cache_key_attrs = ('user_id',)
@@ -50,30 +50,37 @@ def cacheable(func):
             self.user_id = user_id
             self._cache = FilesystemCache()
 
-        @cacheable
+        @cacheable()
         def actions(self):
             yield 'logged in'
             yield 'changed password'
             yield 'searched for somethign'
             # etc.
 
-    The class it is used in must have a `_cache_key_attrs` attribute and a `_cache` Cache instance.
+        @cacheable('tags')
+        def get_tags(self):
+            return ['a', 'b']
 
+        tags = property(get_tags)
+
+    The class it is used in must have a `_cache_key_attrs` attribute and a `_cache` Cache instance.
     '''
-    # def decorator(func): return decorator
-    def wrapper(self, *args, **kwargs):
-        key = keyfunc(self, func.__name__)
-        value = self._cache.get(key)
-        if value is None:
-            logger.info('cache miss; fetching "%s" and writing to cache', key)
-            # self refers to the instance, which SHOULD have a ._cache attribute
-            value = func(self, *args, **kwargs)
-            value = flatten(value)
-            self._cache.put(key, value)
-        else:
-            logger.info('cache hit; reading "%s" from cache', key)
-        return value
-    return wrapper
+    def decorator(func):
+        func_attr = name or func.__name__
+        def wrapper(self, *args, **kwargs):
+            key = keyfunc(self, func_attr)
+            value = self._cache.get(key)
+            if value is None:
+                logger.info('cache miss; fetching "%s" and writing to cache', key)
+                # self refers to the instance, which SHOULD have a ._cache attribute
+                value = func(self, *args, **kwargs)
+                value = flatten(value)
+                self._cache.put(key, value)
+            else:
+                logger.info('cache hit; reading "%s" from cache', key)
+            return value
+        return wrapper
+    return decorator
 
 
 class AbstractCache(object):
