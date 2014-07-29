@@ -15,7 +15,7 @@ setup(
     classifiers=[
         # https://pypi.python.org/pypi?:action=list_classifiers
         'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache Software License',
     ],
     install_requires=[
         'requests>=2.0.0',
