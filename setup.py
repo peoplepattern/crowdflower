@@ -5,7 +5,7 @@ setup(
     version='0.0.11',
     author='Christopher Brown',
     author_email='io@henrian.com',
-    url='https://github.com/chbrown/crowdflower',
+    url='https://github.com/peoplepattern/crowdflower',
     keywords='crowdflower crowdsourcing api client',
     description='CrowdFlower API - Python client',
     long_description=open('README.rst').read(),

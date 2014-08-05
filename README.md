@@ -9,22 +9,24 @@ Install from PyPI:
 
     easy_install -U crowdflower
 
-Or install the latest version GitHub:
+Or install the latest version from GitHub:
 
-    git clone https://github.com/chbrown/crowdflower.git
+    git clone https://github.com/peoplepattern/crowdflower.git
     cd crowdflower
     python setup.py develop
 
 
-## Import examples
+## Basic usage
 
-Import:
+Import like:
 
     import crowdflower
 
-CrowdFlower API keys are 20 characters long; the one below is just random characters.
+CrowdFlower API keys are 20 characters long; the one below is just random
+characters. (You can find your API key at
+[make.crowdflower.com/account/user](https://make.crowdflower.com/account/user).)
 
-    conn = crowdflower.Connection('LbcxvIlE3x1M8F6TT5hN')
+    conn = crowdflower.Connection(api_key='LbcxvIlE3x1M8F6TT5hN')
 
 The library will default to an environment variable called `CROWDFLOWER_API_KEY` if
 none is specified here:
@@ -38,12 +40,15 @@ option currently supported, and serializes JSON files to `/tmp/crowdflower/*`.
     conn = crowdflower.Connection(cache='filesystem')
 
 
-## More examples
+## Inspecting existing jobs
 
 Loop through all your jobs and print the titles:
 
     for job in conn.jobs():
         print job.properties['title']
+
+
+## Creating a new job
 
 Create a new job with some new units:
 
@@ -53,20 +58,59 @@ Create a new job with some new units:
         {'id': '3', 'name': 'Maisy Ester'},
     ]
     job = conn.upload(data)
-    job.update({
+    update_result = job.update({
         'title': 'Gender labels',
         'included_countries': ['US', 'GB'],  # Limit to the USA and United Kingdom
+            # Please note, if you are located in another country and you would like
+            # to experiment with the sandbox (internal workers) then you also need to add
+            # your own country. Otherwise your submissions as internal worker will be rejected
+            # with Error 301 (low quality).
         'payment_cents': 5,
         'judgments_per_unit': 2,
-        'instructions': <some instructions html>,
-        'cml': <some layout cml>,
+        'instructions': 'some <i>instructions</i> html',
+        'cml': 'some layout cml, e.g., <cml:text label="Sample text field:" validates="required" />',
         'options': {
             'front_load': 1, # quiz mode = 1; turn off with 0
         }
     })
+
+    if 'errors' in update_result:
+        print(update_result['errors'])
+        exit()
+
     job.gold_add('gender', 'gender_gold')
 
-    print job
+Launch job for on-demand workers (the default):
+
+    job.launch(2)
+
+Launch job for internal workers (sandbox):
+
+    job.launch(2, channels=['cf_internal'])
+
+Check the status of the job:
+
+    print job.ping()
+
+Clean up; delete all the jobs that were created by the above example:
+
+    for job in conn.jobs():
+        if job.properties['title'] == 'Gender labels':
+            print 'Deleting Job#%s' % job.id
+            print job.delete()
+
+View annotations collected so far:
+
+    for row in job.download():
+        print row
+
+
+## Debugging / Logging
+
+In order to turn on logging use the following in your script:
+
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
 
 
 ## Motivation
@@ -80,11 +124,15 @@ Thus, a thin Python client for the CrowdFlower API.
 
 ## References
 
-This package uses [kennethreitz](https://github.com/kennethreitz)'s [Requests](http://docs.python-requests.org/en/latest/api/) to communicate with the CrowdFlower API over HTTP. Requests is [Apache2 licensed](http://docs.python-requests.org/en/latest/user/intro/#apache2-license).
+The CrowdFlower blog is the definitive (but incomplete) source for API documentation:
 
 * [The main API documentation page](http://success.crowdflower.com/customer/portal/articles/1288323)
 * [More info on the API](http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api)
 * [Details on using API webhooks](http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api)
+
+The source code for the official [ruby-crowdflower](https://github.com/CrowdFlower/ruby-crowdflower) project is also helpful in some cases.
+
+This package uses [kennethreitz](https://github.com/kennethreitz)'s [Requests](http://docs.python-requests.org/en/latest/api/) to communicate with the CrowdFlower API over HTTP. Requests is [Apache2 licensed](http://docs.python-requests.org/en/latest/user/intro/#apache2-license).
 
 
 ## Authors
