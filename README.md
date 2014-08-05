@@ -135,6 +135,28 @@ The source code for the official [ruby-crowdflower](https://github.com/CrowdFlow
 This package uses [kennethreitz](https://github.com/kennethreitz)'s [Requests](http://docs.python-requests.org/en/latest/api/) to communicate with the CrowdFlower API over HTTP. Requests is [Apache2 licensed](http://docs.python-requests.org/en/latest/user/intro/#apache2-license).
 
 
+## Support
+
+Found a bug? Want a new feature?
+[File an issue](https://github.com/peoplepattern/crowdflower/issues/new)!
+
+
+## Contributing
+
+We love open source and working with the larger community to make our codebase even better! If you have any contributions, please fork this repository, commit your changes to a new branch, and then submit a pull request back to this repository (peoplepattern/crowdflower). To expedite merging your pull request, please follow the stylistic conventions already present in the repository. These include:
+
+* Adhere to PEP8
+  - We're not super strict on every single PEP8 convention, but we have a few hard requirements:
+    + Four-space indentation
+    + No tabs
+    + No semicolons
+    + No wildcard imports
+* No trailing whitespace
+* Use docstrings liberally
+
+The Apache License 2.0 contains a clause covering the [Contributor License Agreement](http://www.apache.org/licenses/LICENSE-2.0.html#contributions).
+
+
 ## Authors
 
 * [Christopher Brown](https://github.com/chbrown)
