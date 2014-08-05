@@ -108,7 +108,7 @@ class Job(object):
 
         Automatically cached.
         '''
-        self._connection.request('/jobs/%s/units' % self.id)
+        return self._connection.request('/jobs/%s/units' % self.id)
 
     def delete_unit(self, unit_id):
         response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
@@ -119,6 +119,7 @@ class Job(object):
     def upload(self, units):
         headers = {'Content-Type': 'application/json'}
         data = '\n'.join(json.dumps(unit) for unit in units)
+        logger.debug('Uploading data to Job[%d]: %s', self.id, data)
         res = self._connection.request('/jobs/%s/upload' % self.id, method='POST', headers=headers, data=data)
 
         # reset cached units
@@ -192,6 +193,36 @@ class Job(object):
         self._cache.remove(keyfunc(self, 'units'))
         return res
 
+    def launch(self, units_count, channels=('on_demand',)):
+        '''
+        `units_count` is the number of units to order
+        `channels` should be some non-empty combination of 'cf_internal'
+            (sandbox mode) and / or 'on_demand' (normal)
+        '''
+        data = rails_params(dict(channels=channels, debit=dict(units_count=units_count)))
+        res = self._connection.request('/jobs/%s/orders' % self.id, method='POST', params=data)
+        self._cache.remove(keyfunc(self, 'properties'))
+        return res
+
+    def ping(self):
+        '''
+        Determine the status of a job.
+
+        Returns a data structure like this:
+            {
+                "all_units": 298,
+                "golden_units": 239,
+                "ordered_units": 49,
+                "all_judgments": 168,
+                "needed_judgments": 0,
+                "tainted_judgments": 45,
+                "completed_gold_estimate": 239,
+                "completed_non_gold_estimate": 49,
+                "completed_units_estimate": 288
+            }
+        '''
+        return self._connection.request('/jobs/%s/ping' % self.id)
+
     def delete(self):
         '''
         Deletes the entire job permanently
@@ -261,6 +292,7 @@ class Job(object):
             reader = csv.DictReader(zipinfo_fp)
             for row in reader:
                 yield {key: value.decode('utf8') for key, value in row.items()}
+
 
     @property
     @cacheable()

@@ -5,6 +5,7 @@ from requests import Request, Session
 # I regret that python-requests can't handle merging lists of params
 from requests.utils import to_key_val_list
 
+from crowdflower import logger
 from crowdflower.job import Job
 from crowdflower.cache import FilesystemCache, NoCache, cacheable, keyfunc
 
@@ -50,6 +51,8 @@ class Connection(object):
         # merge params with the api key
         req.params = to_key_val_list(req.params) + [('key', self.api_key)]
         prepared_req = self._session.prepare_request(req)
+        logger.debug('Request params: {}'.format(req.params))
+
         res = self._session.send(prepared_req)
         if res.status_code != 200:
             # CrowdFlower responds with a '202 Accepted' when we request a bulk
