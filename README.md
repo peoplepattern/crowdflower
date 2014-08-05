@@ -62,13 +62,14 @@ Create a new job with some new units:
         'title': 'Gender labels',
         'included_countries': ['US', 'GB'],  # Limit to the USA and United Kingdom
             # Please note, if you are located in another country and you would like
-            # to experiment with the sandbox (internal workers) then you also need to add
-            # your own country. Otherwise your submissions as internal worker will be rejected
-            # with Error 301 (low quality).
+            # to experiment with the sandbox (internal workers) then you also need
+            # to add your own country. Otherwise your submissions as internal worker
+            # will be rejected with Error 301 (low quality).
         'payment_cents': 5,
         'judgments_per_unit': 2,
         'instructions': 'some <i>instructions</i> html',
-        'cml': 'some layout cml, e.g., <cml:text label="Sample text field:" validates="required" />',
+        'cml': 'some layout cml, e.g., '
+            '<cml:text label="Sample text field:" validates="required" />',
         'options': {
             'front_load': 1, # quiz mode = 1; turn off with 0
         }
@@ -107,7 +108,7 @@ View annotations collected so far:
 
 ## Debugging / Logging
 
-In order to turn on logging use the following in your script:
+To turn on verbose logging use the following in your script:
 
     import logging
     logging.basicConfig(level=logging.DEBUG)
