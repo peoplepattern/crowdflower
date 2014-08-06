@@ -128,8 +128,8 @@ class Job(object):
         return res
 
     def update(self, props):
+        logger.debug('Updating Job[%d]: %r', self.id, props)
         params = rails_params({'job': props})
-        logger.debug('Updating Job[%d]: %r', self.id, params)
         res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
 
         # reset cached properties
