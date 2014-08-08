@@ -92,23 +92,55 @@ class Job(object):
     @cacheable()
     def units(self):
         '''
-        Returns a dict of {unit_id: dict_of_unit_properties}, e.g.,
+        Returns a list of units, e.g.,
+
+            [
+                {
+                    '_unit_id': '495781935',
+                    'id': 'may25_1029',
+                    'text': 'remember when I was in hospital for four months nd it was my birthday nd everyone forgot nd no one even came to visit me'
+                },
+                {
+                    '_unit_id': '495781936',
+                    'id': 'may25_1030',
+                    'text': 'I had the wifi taken away and I can't have any friends over what a great Summer!'
+                }
+                ...
+            ]
+
+        N.b.: this is not the same format that CrowdFlower responds with, which is more like:
 
             {
-                u'495781935': {
-                    u'id': u'may25_1029',
-                    u'text': u'remember when I was in hospital for four months nd it was my birthday nd everyone forgot nd no one even came to visit me'
+                '495781935': {
+                    'id': 'may25_1029',
+                    'text': 'remember when I was in hospital for four months nd it was my birthday nd everyone forgot nd no one even came to visit me'
                 },
-                u'495781936': {
-                    u'id': u'may25_1030',
-                    u'text': u'I had the wifi taken away and I can't have any friends over what a great Summer!'
+                '495781936': {
+                    'id': 'may25_1030',
+                    'text': 'I had the wifi taken away and I can't have any friends over what a great Summer!'
                 }
                 ...
             }
 
-        Automatically cached.
+        But since we are caching and de-paginating, it's better to return a list (by being an iterator)
+
+        Neither `page` nor `limit` query parameters are documented, but they work as expected. Page numbering starts at 1, and the limit has a maximum of 1000 (which is also the default).
+
+        The returned units are not fully hydrated; in fact, the response only includes each unit id and the original unit payload. To see the crowd's responses, you must use /jobs/{job.id}/units/{unit.id}, or the bulk download method (see Job.download()).
+
         '''
-        return self._connection.request('/jobs/%s/units' % self.id)
+        page = 0
+        while True:
+            page += 1
+            params = dict(page=page)
+            units_response = self._connection.request('/jobs/%s/units' % self.id, params=params)
+            for unit_id, unit_properties in units_response.items():
+                # hopefully the user has not specified '_unit_id' as a custom field
+                unit_properties['_unit_id'] = unit_id
+                yield unit_properties
+            if len(units_response) < 1000:
+                break
+
 
     def delete_unit(self, unit_id):
         response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
