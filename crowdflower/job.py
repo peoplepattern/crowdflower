@@ -1,5 +1,6 @@
 import csv
 import json
+import shutil
 import zipfile
 from pprint import pformat
 from cStringIO import StringIO
@@ -231,6 +232,7 @@ class Job(object):
         `channels` should be some non-empty combination of 'cf_internal'
             (sandbox mode) and / or 'on_demand' (normal)
         '''
+        channels = list(channels)
         data = rails_params(dict(channels=channels, debit=dict(units_count=units_count)))
         res = self._connection.request('/jobs/%s/orders' % self.id, method='POST', params=data)
         self._cache.remove(keyfunc(self, 'properties'))
@@ -330,3 +332,19 @@ class Job(object):
     @cacheable()
     def judgments(self):
         return self.download()
+
+
+    def download_csv(self, filepath, full=True):
+        '''
+        Basically the same as job.judgments but without parsing the csv.
+        '''
+        params = dict(full='true' if full else 'false')
+        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
+        res = self._connection.send_request(req)
+        fp = StringIO()
+        fp.write(res.content)
+        zf = zipfile.ZipFile(fp)
+        zipinfo = zf.filelist[0]
+        fsrc = zf.open(zipinfo)
+        with open(filepath, 'w') as fdst:
+            shutil.copyfileobj(fsrc, fdst)

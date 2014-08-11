@@ -136,6 +136,15 @@ View annotations collected so far:
     for row in job.download():
         print row
 
+Example
+-------
+
+See the ``README.md`` in the
+```examples/`` <https://github.com/peoplepattern/crowdflower/tree/master/examples>`__
+directory for a full spam classification example using the freely
+available `SMS Spam
+Collection <http://www.dt.fee.unicamp.br/~tiago/smsspamcollection/>`__.
+
 Debugging / Logging
 -------------------
 
@@ -173,6 +182,8 @@ documentation:
    API <http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api>`__
 -  `Details on using API
    webhooks <http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api>`__
+-  `API Request
+   Examples <http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples>`__
 
 The source code for the official
 `ruby-crowdflower <https://github.com/CrowdFlower/ruby-crowdflower>`__

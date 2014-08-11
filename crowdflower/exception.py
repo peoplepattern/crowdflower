@@ -9,7 +9,8 @@ class CrowdFlowerError(Exception):
     def __str__(self):
         return '%s: %d %s at %s' % (
             self.__class__.__name__,
-            self.response.status_code, self.response.reason,
+            self.response.status_code,
+            self.response.reason,
             self.request.url)
 
     __repr__ = __str__

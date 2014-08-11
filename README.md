@@ -106,6 +106,11 @@ View annotations collected so far:
         print row
 
 
+## Example
+
+See the `README.md` in the [`examples/`](https://github.com/peoplepattern/crowdflower/tree/master/examples) directory for a full spam classification example using the freely available [SMS Spam Collection](http://www.dt.fee.unicamp.br/~tiago/smsspamcollection/).
+
+
 ## Debugging / Logging
 
 To turn on verbose logging use the following in your script:
@@ -130,6 +135,7 @@ The CrowdFlower blog is the definitive (but incomplete) source for API documenta
 * [The main API documentation page](http://success.crowdflower.com/customer/portal/articles/1288323)
 * [More info on the API](http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api)
 * [Details on using API webhooks](http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api)
+* [API Request Examples](http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples)
 
 The source code for the official [ruby-crowdflower](https://github.com/CrowdFlower/ruby-crowdflower) project is also helpful in some cases.
 
