@@ -67,6 +67,9 @@ class Job(object):
     def __repr__(self):
         return pformat(self.properties)
 
+    def _cache_flush(self, func_attr):
+        self._cache.remove(keyfunc(self, func_attr))
+
     @property
     @cacheable()
     def properties(self):
@@ -81,14 +84,15 @@ class Job(object):
     def set_tags(self, tags):
         params = rails_params({'tags': tags})
         self._connection.request('/jobs/%s/tags' % self.id, method='PUT', params=params)
-        self._cache.remove(keyfunc(self, 'tags'))
+        self._cache_flush('tags')
 
     tags = property(get_tags, set_tags)
 
     def add_tags(self, tags):
         params = rails_params({'tags': tags})
         self._connection.request('/jobs/%s/tags' % self.id, method='POST', params=params)
-        self._cache.remove(keyfunc(self, 'tags'))
+        self._cache_flush('tags')
+
 
     @property
     @cacheable()
@@ -147,7 +151,7 @@ class Job(object):
     def delete_unit(self, unit_id):
         response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
         # bust cache if the request did not raise any errors
-        self._cache.remove(keyfunc(self, 'units'))
+        self._cache_flush('units')
         return response
 
     def upload(self, units):
@@ -157,13 +161,13 @@ class Job(object):
         res = self._connection.request('/jobs/%s/upload' % self.id, method='POST', headers=headers, data=data)
 
         # reset cached units
-        self._cache.remove(keyfunc(self, 'units'))
+        self._cache_flush('units')
 
         return res
 
     def update(self, props):
-        logger.debug('Updating Job[%d]: %r', self.id, props)
         params = rails_params({'job': props})
+        logger.debug('Updating Job[%d]: %r', self.id, params)
 
         try:
             res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
@@ -180,7 +184,7 @@ class Job(object):
                 raise
 
         # reset cached properties
-        self._cache.remove(keyfunc(self, 'properties'))
+        self._cache_flush('properties')
 
         return res
 
@@ -213,8 +217,8 @@ class Job(object):
         params = dict(reset='true')
         res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
         # reset cache
-        self._cache.remove(keyfunc(self, 'properties'))
-        self._cache.remove(keyfunc(self, 'units'))
+        self._cache_flush('properties')
+        self._cache_flush('units')
         return res
 
     def gold_add(self, check, check_with=None):
@@ -236,8 +240,8 @@ class Job(object):
             params['with'] = check_with
         res = self._connection.request('/jobs/%s/gold' % self.id, method='PUT', params=params)
         # reset cache
-        self._cache.remove(keyfunc(self, 'properties'))
-        self._cache.remove(keyfunc(self, 'units'))
+        self._cache_flush('properties')
+        self._cache_flush('units')
         return res
 
     def launch(self, units_count, channels=('on_demand',)):
@@ -249,7 +253,15 @@ class Job(object):
         channels = list(channels)
         data = rails_params(dict(channels=channels, debit=dict(units_count=units_count)))
         res = self._connection.request('/jobs/%s/orders' % self.id, method='POST', params=data)
-        self._cache.remove(keyfunc(self, 'properties'))
+        self._cache_flush('properties')
+        return res
+
+    def cancel(self):
+        '''
+        Cancel this job and refund your account for any judgments not yet received.
+        '''
+        res = self._connection.request('/jobs/%s/cancel' % self.id, method='PUT')
+        self._cache_flush('properties')
         return res
 
     def ping(self):
