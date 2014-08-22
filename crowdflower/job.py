@@ -6,6 +6,7 @@ from pprint import pformat
 from cStringIO import StringIO
 
 from crowdflower import logger
+from crowdflower.exception import CrowdFlowerError
 from crowdflower.cache import cacheable, keyfunc
 from crowdflower.serialization import rails_params
 
@@ -163,7 +164,20 @@ class Job(object):
     def update(self, props):
         logger.debug('Updating Job[%d]: %r', self.id, props)
         params = rails_params({'job': props})
-        res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
+
+        try:
+            res = self._connection.request('/jobs/%s' % self.id, method='PUT', params=params)
+        except CrowdFlowerError, exc:
+            # CrowdFlower sometimes likes to redirect the PUT to a non-API page,
+            # which will raise an error (406 Not Accepted), but we can just
+            # ignore the error since it comes after the update is complete.
+            # This is kind of a hack, since we sometimes want to follow redirects
+            # (e.g., with downloads), but following redirects is more properly
+            # not the default
+            if exc.response.status_code != 406:
+                logger.info('Ignoring 406 "Not Accepted" error: %r', exc);
+            else:
+                raise
 
         # reset cached properties
         self._cache.remove(keyfunc(self, 'properties'))
