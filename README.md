@@ -132,10 +132,11 @@ Thus, a thin Python client for the CrowdFlower API.
 
 The CrowdFlower blog is the definitive (but incomplete) source for API documentation:
 
-* [The main API documentation page](http://success.crowdflower.com/customer/portal/articles/1288323)
-* [More info on the API](http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api)
-* [Details on using API webhooks](http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api)
-* [API Request Examples](http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples)
+* [The main API documentation page](http://success.crowdflower.com/customer/portal/articles/1288323) - Last Updated: Jul 31, 2014
+* [More info on the API](http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api) - Last Updated: Jul 31, 2014
+* [Details on using API webhooks](http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api) - Last Updated: Jul 25, 2014
+* [Rest API](http://success.crowdflower.com/customer/portal/articles/1549074) - Last Updated: Aug 11, 2014
+* [API Request Examples](http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples) - Last Updated: Aug 11, 2014
 
 The source code for the official [ruby-crowdflower](https://github.com/CrowdFlower/ruby-crowdflower) project is also helpful in some cases.
 

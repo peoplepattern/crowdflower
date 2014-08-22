@@ -178,12 +178,19 @@ documentation:
 
 -  `The main API documentation
    page <http://success.crowdflower.com/customer/portal/articles/1288323>`__
+   - Last Updated: Jul 31, 2014
 -  `More info on the
    API <http://success.crowdflower.com/customer/portal/articles/1327304-integrating-with-the-api>`__
+   - Last Updated: Jul 31, 2014
 -  `Details on using API
    webhooks <http://success.crowdflower.com/customer/portal/articles/1373460-job-settings---api>`__
+   - Last Updated: Jul 25, 2014
+-  `Rest
+   API <http://success.crowdflower.com/customer/portal/articles/1549074>`__
+   - Last Updated: Aug 11, 2014
 -  `API Request
    Examples <http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples>`__
+   - Last Updated: Aug 11, 2014
 
 The source code for the official
 `ruby-crowdflower <https://github.com/CrowdFlower/ruby-crowdflower>`__
