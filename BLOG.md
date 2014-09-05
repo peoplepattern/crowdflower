@@ -45,7 +45,7 @@ We'll be using a [SMS (text messaging) dataset](http://www.dt.fee.unicamp.br/~ti
 
 However, for the purposes of this example, I will assume that you are just using the `spam.txt` file without any additions.
 
-The following command will create the job, using a portion of [`spam.txt`](spam.txt), add the "python-example" tag, and mark the test data.
+The following command will create the job, using a portion of [`spam.txt`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.txt), add the "python-example" tag, and mark the test data.
 
     python spam.py create
 
@@ -67,13 +67,13 @@ And download the full dataset:
 
     python spam.py download > spam.json
 
-I have removed the `_worker_id` fields from the [`spam.json`](spam.json) file included in this repository, but otherwise that file was built using the above process.
+I have removed the `_worker_id` fields from the [`spam.json`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.json) file included in this repository, but otherwise that file was built using the above process.
 
 And after getting all the responses and downloading the results, you can delete the job (though you certainly don't have to):
 
     python spam.py delete
 
-Now that you know what the basic steps are, you can refer to the [`spam.py`](spam.py) source file as a template for how to create and launch your own job, and then download the results.
+Now that you know what the basic steps are, you can refer to the [`spam.py`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.py) source file as a template for how to create and launch your own job, and then download the results.
 
 
 ## Community
