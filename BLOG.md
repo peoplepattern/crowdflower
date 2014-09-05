@@ -21,7 +21,7 @@ Then, in a new Python session (I recommend [`IPython`](http://ipython.org/)– i
 
     import crowdflower
     connection = crowdflower.Connection(api_key='LbcxvIlE3x1M8F6TT5hN')
-    print 'Balance:', crowdflower_connection.account()['balance']
+    print 'Balance:', connection.account()['balance']
     for job in connection.jobs():
         print job.properties['title']
 
