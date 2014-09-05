@@ -45,11 +45,16 @@ We'll be using a [SMS (text messaging) dataset](http://www.dt.fee.unicamp.br/~ti
 
 However, for the purposes of this example, I will assume that you are just using the `spam.txt` file without any additions.
 
-The following command will create the job, using a portion of [`spam.txt`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.txt), add the "python-example" tag, and mark the test data.
+The example code ([`spam.py`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.py)) assumes that your API key is accessible in the `CROWDFLOWER_API_KEY` environmental variable. So in the shell session that you use to run the commands below, you'll first need to type:
+
+    export CROWDFLOWER_API_KEY=LbcxvIlE3x1M8F6TT5hN
+
+The next command will create the job, using a portion of [`spam.txt`](https://github.com/peoplepattern/crowdflower/blob/master/examples/spam.txt), add the "python-example" tag, and mark some of the data as test questions.
 
     python spam.py create
 
-You can preview the job in the CrowdFlower website interface now, and even make modifications to it if you want. If your modifications don't dramatically change the structure of the job, the rest of the steps should still work. All of the rest of the commands find the job you just created by searching for jobs with the "python-example" tag, so be sure that you leave that tag in place.
+You can now preview the job in the CrowdFlower website interface now, and even make modifications to it if you want. If your modifications don't dramatically change the structure of the job, the rest of the steps should still work.
+All of the rest of the commands find the job you just created by searching for jobs with the "python-example" tag, so be sure that you leave that tag in place.
 
 However, it's not running yet; you'll need to launch it:
 
