@@ -3,9 +3,11 @@
 We on the engineering team at People Pattern use open source software <i>all the time</i>, like software engineers almost anywhere. We are committed to [giving](https://github.com/scalanlp/nak/commits?author=jasonbaldridge) [back](https://github.com/n8han/giter8/pull/140) [to](https://github.com/twitter/finatra/pull/156) [the](https://github.com/ansible/ansible/pull/7824) open source community.
 Thus far, these contributions have been bugfixes, documentation improvements, etc.—good stuff—but today we are announcing the first full project we have open sourced: a Python client for the [CrowdFlower API](http://success.crowdflower.com/customer/portal/articles/1288323-api-documentation), called, simply, "[crowdflower](https://github.com/peoplepattern/crowdflower)."
 
-[CrowdFlower](http://www.crowdflower.com/) is a crowdsourcing platform, similar to [Mechanical Turk](http://www.peoplepattern.com/mechanical-turk/), but at PeoplePattern we work with a lot of different languages, and found that CrowdFlower's more widely-distributed workforce is a better fit for some of our crowd-workable tasks.
+[CrowdFlower](http://www.crowdflower.com/) is a crowdsourcing platform, similar to [Mechanical Turk](http://www.peoplepattern.com/mechanical-turk/), but at PeoplePattern we work with a lot of different languages, and found that CrowdFlower's more widely distributed workforce is a better fit for some of our crowd-workable tasks.
 
-CrowdFlower provides an official [Ruby client](https://github.com/CrowdFlower/ruby-crowdflower) (which makes sense; their app is Ruby-based), but it is not always kept up to date, and we're more of a Python / Scala shop on the back-end anyway. We use their API to facilitate a pipeline that samples the Twitter spritzer for current tweets and has them labeled in various ways, pulling those labels back into our classifiers. All of this happens with minimal manual intervention, which wouldn't be possible without using the API they provide.
+CrowdFlower provides an official [Ruby client](https://github.com/CrowdFlower/ruby-crowdflower) (which makes sense; their app is Ruby-based), but it is not always kept up to date, and we're more of a Python / Scala shop on the back-end anyway. We use their API in a pipeline that samples the Twitter spritzer for current tweets and has them labeled in various ways, eventually pulling those labels back into our classifiers. All of this happens with minimal manual intervention, which wouldn't be possible without using their API.
+
+## Getting started
 
 For any of the following examples to work, you'll need a CrowdFlower account. As of August 2014, they no longer offer pay-as-you-go accounts, but you can [sign up for a free trial](https://make.crowdflower.com/users/new?redirect_url=https%3A%2F%2Fcrowdflower.com%2Fjobs&app=make). You'll need to grab your API key from [make.crowdflower.com/account/user](https://make.crowdflower.com/account/user), which will look something like `LbcxvIlE3x1M8F6TT5hN`.
 
@@ -29,7 +31,7 @@ That will print out your account balance and the titles of all your current jobs
 
 ## Full example
 
-First, add $10 to your CrowdFlower account. The following task was $6.65 when I ran it, and shouldn't be too far off that when you run it.
+First, add at least $10 to your CrowdFlower account. The following task was $6.65 when I ran it, and shouldn't be too far off that when you run it.
 
 Second, you'll need to clone the source repository; the example code is part of the same repository, but is not part of the distributed, importable package.
 
@@ -85,4 +87,4 @@ Now that you know what the basic steps are, you can refer to the [`spam.py`](htt
 
 We love open source and working with the larger community to make our codebase even better! If you have any contributions, please fork the repository and send us a pull request through GitHub. For more details and instructions on filing issues, refer to the repository [README](https://github.com/peoplepattern/crowdflower).
 
-The `crowdflower` source code is ©2014 People Pattern Corporation and licensed under the Apache License, Version 2.0.
+The `crowdflower` source code is Copyright 2014 People Pattern Corporation and [licensed](https://github.com/peoplepattern/crowdflower/blob/master/LICENSE) under the Apache License, Version 2.0.
