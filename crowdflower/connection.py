@@ -8,6 +8,7 @@ from requests.utils import to_key_val_list
 from crowdflower import logger
 from crowdflower.job import Job
 from crowdflower.cache import FilesystemCache, NoCache, cacheable, keyfunc
+from crowdflower.serialization import rails_params
 
 
 class Connection(object):
@@ -26,13 +27,9 @@ class Connection(object):
             self._cache = NoCache()
 
         self._session = Session()
-        # self._session.params['key'] = self.api_key
-        # self._session.verify = False
-
 
     def __repr__(self):
         return '<{:} using {:} with key {:}...>'.format(self.__class__.__name__, self.api_url, self.api_key[:6])
-
 
     def create_request(self, path, method='GET', **kw):
         url = self.api_url + path
@@ -58,6 +55,7 @@ class Connection(object):
             # CrowdFlower responds with a '202 Accepted' when we request a bulk
             # download which has not yet been generated, which means we simply
             # have to wait and try again
+            print res.content
             raise CrowdFlowerError(req, res)
         return res
 
@@ -75,6 +73,14 @@ class Connection(object):
             return res.json()
         except Exception, err:
             raise CrowdFlowerJSONError(req, res, err)
+
+    def create_job(self, job_data):
+        '''
+        Creates an empty job with given `job_data` attributes.
+        '''
+        params = rails_params({'job': job_data})
+        resp = self.request('/jobs', method='POST', params=params)
+        return Job(resp['id'], self)
 
     def job(self, job_id):
         # doesn't actually call anything
