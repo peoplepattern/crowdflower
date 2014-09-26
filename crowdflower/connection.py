@@ -55,7 +55,6 @@ class Connection(object):
             # CrowdFlower responds with a '202 Accepted' when we request a bulk
             # download which has not yet been generated, which means we simply
             # have to wait and try again
-            print res.content
             raise CrowdFlowerError(req, res)
         return res
 
