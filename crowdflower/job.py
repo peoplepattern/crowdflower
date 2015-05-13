@@ -11,16 +11,19 @@ from crowdflower.cache import cacheable, keyfunc
 from crowdflower.serialization import rails_params
 
 
+# Valid types of results that can be downloaded
+VALID_RESULT_TYPES = {'full', 'aggregated', 'source', 'workset'}
+
+
 # Thrown if user requests an invalid type when downloading a CSV
 class ResultsTypeError(Exception):
-    def __init__(self, results_type, valid_results_types):
+    def __init__(self, results_type):
         self.results_type = results_type
-        self.valid_results_types = valid_results_types
 
     def __repr__(self):
         return 'Results type %s is not in %r' % (
             self.results_type,
-            self.valid_results_types
+            VALID_RESULT_TYPES
         )
 
     __str__ = __repr__
@@ -373,11 +376,11 @@ class Job(object):
     def judgments(self):
         return self.download()
 
-    def download_csv(self, filepath, full=None, type='full'):
+    def download_csv(self, filepath, full=None, result_type='full'):
         '''
         Basically the same as job.judgments but without parsing the csv.
 
-        full is ignored unless it is False, in which case type is set to
+        full is ignored unless it is False, in which case result_type is set to
         'aggregated'.
 
         Other supported types are given at:
@@ -385,20 +388,19 @@ class Job(object):
         (Though, as of 2015-05-13, some, such as 'source' and 'workset' are
         not documented)
 
-        If a type other than 'full' is given, full is ignored.
+        If a result_type other than 'full' is given, full is ignored.
         '''
 
         # Advantage of catching the error here is we can give a more useful
         # error message
         # The disadvantage is that we have to explicitly encode parts of the
         # API that may be incomplete or may change
-        valid_types = {'full', 'aggregated', 'source', 'workset'}
-        if type not in valid_types:
-            raise ResultsTypeError(type, valid_types)
+        if result_type not in VALID_RESULT_TYPES:
+            raise ResultsTypeError(result_type)
 
         if full is not None:
-            type = 'full' if full else 'aggregated'
-        params = dict(type=type)
+            result_type = 'full' if full else 'aggregated'
+        params = dict(type=result_type)
 
         req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
         res = self._connection.send_request(req)
@@ -410,12 +412,19 @@ class Job(object):
         with open(filepath, 'w') as fdst:
             shutil.copyfileobj(fsrc, fdst)
 
-    def regenerate_csv(self, type):
+    def regenerate_csv(self, result_type):
         '''Regenerate the CSV on the server
-        :param type: any valid type that can be passed to download_csv,
-        e.g., 'full', 'aggregated', 'source', etc.
+
+        Blocks until regeneration is complete, which can take a while for
+        jobs with many units.
+
+        :param result_type: any valid result_type that can be passed to
+        download_csv, e.g., 'full', 'aggregated', 'source', etc.
         '''
 
-        params = dict(type=type)
+        if result_type not in VALID_RESULT_TYPES:
+            raise ResultsTypeError(result_type)
+
+        params = dict(type=result_type)
         req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
         self._connection.send_request(req)
