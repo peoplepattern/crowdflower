@@ -402,7 +402,9 @@ class Job(object):
             result_type = 'full' if full else 'aggregated'
         params = dict(type=result_type)
 
-        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
+        req = self._connection.create_request('/jobs/%s.csv' % self.id,
+                                              method='GET',
+                                              params=params)
         res = self._connection.send_request(req)
         fp = StringIO()
         fp.write(res.content)
@@ -415,8 +417,8 @@ class Job(object):
     def regenerate_csv(self, result_type):
         '''Regenerate the CSV on the server
 
-        Blocks until regeneration is complete, which can take a while for
-        jobs with many units.
+        May return before regeneration is complete, in which case, you will need
+        to wait a bit before download the CSV will succeed.
 
         :param result_type: any valid result_type that can be passed to
         download_csv, e.g., 'full', 'aggregated', 'source', etc.
@@ -426,5 +428,7 @@ class Job(object):
             raise ResultsTypeError(result_type)
 
         params = dict(type=result_type)
-        req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
+        req = self._connection.create_request('/jobs/%s/regenerate' % self.id,
+                                              method='POST',
+                                              params=params)
         self._connection.send_request(req)
