@@ -368,12 +368,10 @@ class Job(object):
             for row in reader:
                 yield {key: value.decode('utf8') for key, value in row.items()}
 
-
     @property
     @cacheable()
     def judgments(self):
         return self.download()
-
 
     def download_csv(self, filepath, full=None, type='results'):
         '''
@@ -412,3 +410,13 @@ class Job(object):
         fsrc = zf.open(zipinfo)
         with open(filepath, 'w') as fdst:
             shutil.copyfileobj(fsrc, fdst)
+
+    def regenerate_csv(self, type):
+        '''Regenerate the CSV on the server
+        :param type: any valid type that can be passed to download_csv,
+        e.g., 'full', 'aggregated', 'source', etc.
+        '''
+
+        params = dict(type=type)
+        req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
+        self._connection.send_request(req)
