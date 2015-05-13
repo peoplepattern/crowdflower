@@ -11,6 +11,21 @@ from crowdflower.cache import cacheable, keyfunc
 from crowdflower.serialization import rails_params
 
 
+# Thrown if user requests an invalid type when downloading a CSV
+class ResultsTypeError(Exception):
+    def __init__(self, results_type, valid_results_types):
+        self.results_type = results_type
+        self.valid_results_types = valid_results_types
+
+    def __repr__(self):
+        return 'Results type %s is not in %r' % (
+            self.results_type,
+            self.valid_results_types
+        )
+
+    __str__ = __repr__
+
+
 class Job(object):
     '''
     Read / Write attributes
@@ -360,11 +375,34 @@ class Job(object):
         return self.download()
 
 
-    def download_csv(self, filepath, full=True):
+    def download_csv(self, filepath, full=None, type='results'):
         '''
         Basically the same as job.judgments but without parsing the csv.
+
+        If full is not given and type='results', full defaults to True
+        Other supported types are given at:
+        https://success.crowdflower.com/hc/en-us/articles/202703425-CrowdFlower-API-Requests-Guide#get_results
+        (Though, as of 2015-05-13, some, such as 'source' and 'workset' are
+        not documented)
+
+        If a type other than 'results' is given, full is ignored.
         '''
-        params = dict(full='true' if full else 'false')
+
+        # Advantage of catching the error here is we can give a more useful
+        # error message
+        # The disadvantage is that we have to explicitly encode parts of the
+        # API that may be incomplete or may change
+        valid_types = {'results', 'full', 'aggregated', 'source', 'workset'}
+        if type not in valid_types:
+            raise ResultsTypeError(type, valid_types)
+
+        if type == 'results':
+            if full is None:
+                full = True
+            params = dict(type='full' if full else 'aggregated')
+        else:
+            params = dict(type=type)
+
         req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
         res = self._connection.send_request(req)
         fp = StringIO()
