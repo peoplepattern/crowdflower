@@ -97,7 +97,13 @@ class Connection(object):
             jobs_response = self.request('/jobs', params=params)
             for job_properties in jobs_response:
                 # somehow add the Job's properties to the cache, since we have all the data anyway?
-                yield job_properties['id']
+                # if a job is in an invalid state, the response will not have
+                # an 'id' key for that job, but an 'errors' key pointing to a
+                # list of strings decribing the error(s)
+                if 'id' in job_properties:
+                    yield job_properties['id']
+                else:
+                    continue
             if len(jobs_response) < 10:
                 break
 
