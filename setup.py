@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='crowdflower',
-    version='0.1.2',
+    version='0.1.3',
     author='Christopher Brown',
     author_email='io@henrian.com',
     url='https://github.com/peoplepattern/crowdflower',
