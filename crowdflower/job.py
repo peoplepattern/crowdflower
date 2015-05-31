@@ -353,18 +353,38 @@ class Job(object):
             for row in reader:
                 yield {key: value.decode('utf8') for key, value in row.items()}
 
-
     @property
     @cacheable()
     def judgments(self):
         return self.download()
 
+    def download_csv(self, filepath, report_type='full'):
+        '''
+        Basically the same as job.judgments but without parsing the CSV.
 
-    def download_csv(self, filepath, full=True):
+        The given 'report_type' determines the output format. From the
+        documentation:
+
+        * full: Returns the full report containing every judgment
+        * aggregated: Returns the aggregate report containing the aggregated
+          response for each row
+        * json: Returns the JSON report containing the aggregated response, as
+          well as the individual judgments, for each row
+
+        The CrowdFlower API (as of 2015-05-13) also supports the following
+        undocumented 'report_type' values:
+
+        * source
+        * workset
+
+        References:
+        * https://success.crowdflower.com/hc/en-us/articles/202703425-CrowdFlower-API-Requests-Guide#get_results
         '''
-        Basically the same as job.judgments but without parsing the csv.
-        '''
-        params = dict(full='true' if full else 'false')
+        params = {}
+        if report_type is not None:
+            params['type'] = report_type
+        # even type=json uses the .csv extension. I guess because JSON's values
+        # are at least partly separated by commas?
         req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
         res = self._connection.send_request(req)
         fp = StringIO()
@@ -374,3 +394,20 @@ class Job(object):
         fsrc = zf.open(zipinfo)
         with open(filepath, 'w') as fdst:
             shutil.copyfileobj(fsrc, fdst)
+
+    def regenerate(self, report_type='full'):
+        '''
+        Triggers regeneration of a report on the CrowdFlower servers.
+
+        This will most likely return before regeneration is complete. Depending
+        on the size of your job's results, you may need to wait a bit before
+        downloading the CSV will succeed.
+
+        :param report_type: any valid report_type that can be passed to
+        download_csv, e.g., 'full', 'aggregated', 'source', etc.
+        '''
+        params = {}
+        if report_type is not None:
+            params['type'] = report_type
+        req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
+        self._connection.send_request(req)
