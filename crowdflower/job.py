@@ -11,24 +11,6 @@ from crowdflower.cache import cacheable, keyfunc
 from crowdflower.serialization import rails_params
 
 
-# Valid types of results that can be downloaded
-VALID_RESULT_TYPES = {'full', 'aggregated', 'source', 'workset'}
-
-
-# Thrown if user requests an invalid type when downloading a CSV
-class ResultsTypeError(Exception):
-    def __init__(self, results_type):
-        self.results_type = results_type
-
-    def __repr__(self):
-        return 'Results type %s is not in %r' % (
-            self.results_type,
-            VALID_RESULT_TYPES
-        )
-
-    __str__ = __repr__
-
-
 class Job(object):
     '''
     Read / Write attributes
@@ -376,35 +358,34 @@ class Job(object):
     def judgments(self):
         return self.download()
 
-    def download_csv(self, filepath, full=None, result_type='full'):
+    def download_csv(self, filepath, report_type='full'):
         '''
-        Basically the same as job.judgments but without parsing the csv.
+        Basically the same as job.judgments but without parsing the CSV.
 
-        full is ignored unless it is False, in which case result_type is set to
-        'aggregated'.
+        The given 'report_type' determines the output format. From the
+        documentation:
 
-        Other supported types are given at:
-        https://success.crowdflower.com/hc/en-us/articles/202703425-CrowdFlower-API-Requests-Guide#get_results
-        (Though, as of 2015-05-13, some, such as 'source' and 'workset' are
-        not documented)
+        * full: Returns the full report containing every judgment
+        * aggregated: Returns the aggregate report containing the aggregated
+          response for each row
+        * json: Returns the JSON report containing the aggregated response, as
+          well as the individual judgments, for each row
 
-        If a result_type other than 'full' is given, full is ignored.
+        The CrowdFlower API (as of 2015-05-13) also supports the following
+        undocumented 'report_type' values:
+
+        * source
+        * workset
+
+        References:
+        * https://success.crowdflower.com/hc/en-us/articles/202703425-CrowdFlower-API-Requests-Guide#get_results
         '''
-
-        # Advantage of catching the error here is we can give a more useful
-        # error message
-        # The disadvantage is that we have to explicitly encode parts of the
-        # API that may be incomplete or may change
-        if result_type not in VALID_RESULT_TYPES:
-            raise ResultsTypeError(result_type)
-
-        if full is not None:
-            result_type = 'full' if full else 'aggregated'
-        params = dict(type=result_type)
-
-        req = self._connection.create_request('/jobs/%s.csv' % self.id,
-                                              method='GET',
-                                              params=params)
+        params = {}
+        if report_type is not None:
+            params['type'] = report_type
+        # even type=json uses the .csv extension. I guess because JSON's values
+        # are at least partly separated by commas?
+        req = self._connection.create_request('/jobs/%s.csv' % self.id, method='GET', params=params)
         res = self._connection.send_request(req)
         fp = StringIO()
         fp.write(res.content)
@@ -414,21 +395,19 @@ class Job(object):
         with open(filepath, 'w') as fdst:
             shutil.copyfileobj(fsrc, fdst)
 
-    def regenerate_csv(self, result_type):
-        '''Regenerate the CSV on the server
+    def regenerate(self, report_type='full'):
+        '''
+        Triggers regeneration of a report on the CrowdFlower servers.
 
-        May return before regeneration is complete, in which case, you will need
-        to wait a bit before download the CSV will succeed.
+        This will most likely return before regeneration is complete. Depending
+        on the size of your job's results, you may need to wait a bit before
+        downloading the CSV will succeed.
 
-        :param result_type: any valid result_type that can be passed to
+        :param report_type: any valid report_type that can be passed to
         download_csv, e.g., 'full', 'aggregated', 'source', etc.
         '''
-
-        if result_type not in VALID_RESULT_TYPES:
-            raise ResultsTypeError(result_type)
-
-        params = dict(type=result_type)
-        req = self._connection.create_request('/jobs/%s/regenerate' % self.id,
-                                              method='POST',
-                                              params=params)
+        params = {}
+        if report_type is not None:
+            params['type'] = report_type
+        req = self._connection.create_request('/jobs/%s/regenerate' % self.id, method='POST', params=params)
         self._connection.send_request(req)
