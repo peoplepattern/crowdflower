@@ -8,6 +8,7 @@ from requests.utils import to_key_val_list
 from crowdflower import logger
 from crowdflower.job import Job
 from crowdflower.cache import FilesystemCache, NoCache, cacheable, keyfunc
+from crowdflower.serialization import rails_params
 
 
 class Connection(object):
@@ -26,13 +27,9 @@ class Connection(object):
             self._cache = NoCache()
 
         self._session = Session()
-        # self._session.params['key'] = self.api_key
-        # self._session.verify = False
-
 
     def __repr__(self):
         return '<{:} using {:} with key {:}...>'.format(self.__class__.__name__, self.api_url, self.api_key[:6])
-
 
     def create_request(self, path, method='GET', **kw):
         url = self.api_url + path
@@ -114,6 +111,18 @@ class Connection(object):
         '''
         for job_id in self.job_ids:
             yield Job(job_id, self)
+
+    def create_job(self, props):
+        '''
+        Creates an empty job with given `props` attributes.
+        '''
+        params = rails_params({'job': props})
+        job_response = self.request('/jobs', method='POST', params=params)
+        job = Job(job_response['id'], self)
+        job._properties = job_response
+        # bust cache of job_ids
+        self._cache.remove(keyfunc(self, 'job_ids'))
+        return job
 
     def upload(self, units):
         '''

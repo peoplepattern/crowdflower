@@ -147,12 +147,24 @@ class Job(object):
             if len(units_response) < 1000:
                 break
 
-
     def delete_unit(self, unit_id):
         response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
         # bust cache if the request did not raise any errors
         self._cache_flush('units')
         return response
+
+    def upload_unit(self, unit):
+        '''
+        Uploads a single unit to the job.
+        '''
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps({'unit': {'data': unit}})
+        res = self._connection.request('/jobs/%s/units' % self.id, method='POST', headers=headers, data=data)
+
+        # reset cached units
+        self._cache_flush('units')
+
+        return res
 
     def upload(self, units):
         headers = {'Content-Type': 'application/json'}
