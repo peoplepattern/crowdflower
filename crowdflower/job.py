@@ -157,9 +157,13 @@ class Job(object):
         '''
         Uploads a single unit to the job.
         '''
-        data = json.dumps({'unit': {'data': unit}})
         headers = {'Content-Type': 'application/json'}
-        res = self._connection.request('/jobs/%s/units' % self.id, method='POST', data=data, headers=headers)
+        data = json.dumps({'unit': {'data': unit}})
+        res = self._connection.request('/jobs/%s/units' % self.id, method='POST', headers=headers, data=data)
+
+        # reset cached units
+        self._cache_flush('units')
+
         return res
 
     def upload(self, units):

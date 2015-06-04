@@ -73,14 +73,6 @@ class Connection(object):
         except Exception, err:
             raise CrowdFlowerJSONError(req, res, err)
 
-    def create_job(self, job_data):
-        '''
-        Creates an empty job with given `job_data` attributes.
-        '''
-        params = rails_params({'job': job_data})
-        resp = self.request('/jobs', method='POST', params=params)
-        return Job(resp['id'], self)
-
     def job(self, job_id):
         # doesn't actually call anything
         return Job(job_id, self)
@@ -119,6 +111,18 @@ class Connection(object):
         '''
         for job_id in self.job_ids:
             yield Job(job_id, self)
+
+    def create_job(self, props):
+        '''
+        Creates an empty job with given `props` attributes.
+        '''
+        params = rails_params({'job': props})
+        job_response = self.request('/jobs', method='POST', params=params)
+        job = Job(job_response['id'], self)
+        job._properties = job_response
+        # bust cache of job_ids
+        self._cache.remove(keyfunc(self, 'job_ids'))
+        return job
 
     def upload(self, units):
         '''
