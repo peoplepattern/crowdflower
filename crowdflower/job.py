@@ -147,6 +147,11 @@ class Job(object):
             if len(units_response) < 1000:
                 break
 
+    def copy_with_testquestions(self):
+        params = {'gold':'true'}
+        self._connection.request('/jobs/%s/copy' % self.id, method='GET', params=params)
+        return Job(self.properties['id'], self._connection)
+        
     def delete_unit(self, unit_id):
         response = self._connection.request('/jobs/%s/units/%s' % (self.id, unit_id), method='DELETE')
         # bust cache if the request did not raise any errors
