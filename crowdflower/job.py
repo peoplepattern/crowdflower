@@ -301,6 +301,22 @@ class Job(object):
         '''
         return self._connection.request('/jobs/%s' % self.id, method='DELETE')
 
+    def copy(self, all_units=None, gold=None):
+        '''
+        Copy this job and return the new one.
+
+        When all_units='true', copies the entire job (the gold argument is ignored).
+        When gold='true', copies the job with only its test questions.
+        When both gold and all_units are None, copies all the settings of the job, but without its rows.
+        '''
+        params = dict()
+        if all_units is not None:
+            params = {'all_units': all_units}
+        elif gold is not None:
+            params = {'gold': gold}
+        response = self._connection.request('/jobs/%s/copy' % self.id, method='GET', params=params)
+        return Job(response['id'], self._connection)
+
     def download(self, full=True):
         '''The resulting CSV will have headers like:
 
