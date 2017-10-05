@@ -9,13 +9,27 @@ with Python.
 Installation
 ------------
 
-Install from PyPI:
+Install from `PyPI <https://pypi.python.org/pypi/crowdflower>`__ with
+```setuptools`` <https://setuptools.readthedocs.io/>`__:
 
 ::
 
     easy_install -U crowdflower
 
-Or install the latest version from GitHub:
+Or with ```pip`` <https://pip.pypa.io/>`__:
+
+::
+
+    pip install -U crowdflower
+
+Or install the latest (potentially unreleased and unstable) code from
+GitHub, using ``pip``:
+
+::
+
+    git+https://github.com/twosigma/ngrid
+
+Or build the source yourself, with ``setuptools``:
 
 ::
 
@@ -191,6 +205,9 @@ documentation:
 -  `API Request
    Examples <http://success.crowdflower.com/customer/portal/articles/1553902-curl-request-examples>`__
    - Last Updated: Aug 11, 2014
+-  `CML (CrowdFlower Markup
+   Language) <http://success.crowdflower.com/customer/portal/articles/1290342-cml-crowdflower-markup-language>`__
+   - Last Updated: Aug 12, 2014
 
 The source code for the official
 `ruby-crowdflower <https://github.com/CrowdFlower/ruby-crowdflower>`__
