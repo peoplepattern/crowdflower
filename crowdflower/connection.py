@@ -17,6 +17,8 @@ class Connection(object):
     _cache_key_attrs = ('api_key',)
 
     def __init__(self, cache=None, api_key=DEFAULT_API_KEY, api_url=DEFAULT_API_URL):
+        if api_key is None:
+            logger.warning("No API key given.")
         self.api_key = api_key
         self.api_url = api_url
 
