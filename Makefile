@@ -10,4 +10,4 @@ README.rst: README.md
 	pandoc README.md -o $@
 
 publish: README.rst
-	python setup.py register sdist upload
+	python setup.py sdist upload
