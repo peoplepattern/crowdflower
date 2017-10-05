@@ -5,11 +5,19 @@ Client library for interacting with the [CrowdFlower](http://www.crowdflower.com
 
 ## Installation
 
-Install from PyPI:
+Install from [PyPI](https://pypi.python.org/pypi/crowdflower) with [`setuptools`](https://setuptools.readthedocs.io/):
 
     easy_install -U crowdflower
 
-Or install the latest version from GitHub:
+Or with [`pip`](https://pip.pypa.io/):
+
+    pip install -U crowdflower
+
+Or install the latest (potentially unreleased and unstable) code from GitHub, using `pip`:
+
+    git+https://github.com/twosigma/ngrid
+
+Or build the source yourself, with `setuptools`:
 
     git clone https://github.com/peoplepattern/crowdflower.git
     cd crowdflower
